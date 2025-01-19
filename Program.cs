@@ -2,59 +2,16 @@
 
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-List<Plant> plants = new List<Plant>()
-{
-    new Plant()
-    { 
-        Species = "Snake Plant", 
-        LightNeeds = 2,  // low light
-        AskingPrice = 15.00M, 
-        City = "Nashville",
-        ZIP = 37206,
-        Sold = false,
-    },
-    new Plant() 
-    { 
-        Species = "Spider Plant", 
-        LightNeeds = 3,  // med light
-        AskingPrice = 18.99M, 
-        City = "Knoxville",
-        ZIP = 37901,
-        Sold = true,
-    },
-    new Plant()
-    {
-        Species = "Aloe Vera", 
-        LightNeeds = 3,  // med light
-        AskingPrice = 13.99M, 
-        City = "Gallatin",
-        ZIP = 37006,
-        Sold = false,
-    },
-    new Plant()
-    {
-        Species = "Rosemary", 
-        LightNeeds = 5,  // full light
-        AskingPrice = 25.00M, 
-        City = "Chattanooga",
-        ZIP = 37341,
-        Sold = false,
-    },
-    new Plant()
-    {
-        Species = "Hosta", 
-        LightNeeds = 1,  // shade
-        AskingPrice = 13.50M, 
-        City = "Smyrna",
-        ZIP = 37086,
-        Sold = true,
-    }
-};
+List<Plant> plants = PlantOption.InitializePlants(); // Use PlantOption to initialize plants
+Random random = new Random();
 
-string greeting = @"Welcome to Extravert
+string greeting = @"Welcome to Extravert!
 The Plant Adoption App";
 
 Console.WriteLine(greeting);
+
+// Display the plant of the day
+PlantOption.DisplayPlantOfTheDay(plants, random);
 
 string choice = null;
 
@@ -67,6 +24,7 @@ Choose an option:
 2. Post a Plant to be Adopted
 3. Adopt a Plant
 4. Delist a Plant
+5. Search Plant by light Needs
 ");
 
     choice = Console.ReadLine();
@@ -74,24 +32,34 @@ Choose an option:
     switch (choice)
     {
         case "1":
-            Console.WriteLine("Feature not implemented: Display all plants.");
+            Console.Clear();
+            PlantOption.DisplayAllPlants(plants); // Call DisplayAllPlants from PlantOption
             break;
 
         case "2":
-            Console.WriteLine("Feature not implemented: Post a Plant to be Adopted.");
+            Console.Clear();
+            PlantOption.PostPlant(plants); // Call PostPlant from PlantOption
             break;
 
         case "3":
-            Console.WriteLine("Feature not implemented: Adopt a Plant.");
+            Console.Clear();
+            PlantOption.AdoptPlant(plants); // Call AdoptPlant from PlantOption
             break;
 
         case "4":
-            Console.WriteLine("Feature not implemented: Delist a Plant.");
+            Console.Clear();
+            PlantOption.DelistPlant(plants); // Call DelistPlant from PlantOption
+            break;
+
+        case "5":
+            Console.Clear();
+            PlantOption.SearchPlantsByLightNeeds(plants); // Call DelistPlant from PlantOption
             break;
 
         case "0":
+            Console.Clear();
             Console.WriteLine("Thank you for using ExtraVert. Goodbye!");
-            return; 
+            return;
 
         default:
             Console.Clear();
@@ -104,5 +72,6 @@ Choose an option:
     {
         Console.WriteLine("\nPress Enter to return to the menu...");
         Console.ReadLine();
+        Console.Clear();
     }
 }
