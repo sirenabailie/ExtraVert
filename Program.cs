@@ -1,8 +1,7 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿using static System.Runtime.InteropServices.JavaScript.JSType;
 
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
-List<Plant> plants = PlantOption.InitializePlants(); // Use PlantOption to initialize plants
+// Initialize plants using PlantOption
+List<Plant> plants = PlantOption.InitializePlants();
 Random random = new Random();
 
 string greeting = @"Welcome to Extravert!
@@ -24,7 +23,8 @@ Choose an option:
 2. Post a Plant to be Adopted
 3. Adopt a Plant
 4. Delist a Plant
-5. Search Plant by light Needs
+5. Search Plants by Light Needs
+6. View Statistics
 ");
 
     choice = Console.ReadLine();
@@ -53,7 +53,12 @@ Choose an option:
 
         case "5":
             Console.Clear();
-            PlantOption.SearchPlantsByLightNeeds(plants); // Call DelistPlant from PlantOption
+            PlantOption.SearchPlantsByLightNeeds(plants); // Call SearchPlantsByLightNeeds from PlantOption
+            break;
+
+        case "6":
+            Console.Clear();
+            PlantOption.DisplayStatistics(plants); // Call DisplayStatistics from PlantOption
             break;
 
         case "0":
@@ -63,7 +68,7 @@ Choose an option:
 
         default:
             Console.Clear();
-            Console.WriteLine("Invalid choice. Please enter a number between 0 and 4.");
+            Console.WriteLine("Invalid choice. Please enter a number between 0 and 6.");
             break;
     }
 

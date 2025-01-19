@@ -1,4 +1,3 @@
-// PlantOption.cs
 public static class PlantOption
 {
     public static List<Plant> InitializePlants()
@@ -13,6 +12,7 @@ public static class PlantOption
                 City = "Nashville",
                 ZIP = 37206,
                 Sold = false,
+                AvailableUntil = DateTime.Now.AddDays(30) // Available for 30 days
             },
             new Plant() 
             { 
@@ -22,6 +22,7 @@ public static class PlantOption
                 City = "Knoxville",
                 ZIP = 37901,
                 Sold = true,
+                AvailableUntil = DateTime.Now.AddDays(20) // Available for 20 days
             },
             new Plant()
             {
@@ -31,6 +32,7 @@ public static class PlantOption
                 City = "Gallatin",
                 ZIP = 37006,
                 Sold = false,
+                AvailableUntil = DateTime.Now.AddDays(25) // Available for 25 days
             },
             new Plant()
             {
@@ -40,6 +42,7 @@ public static class PlantOption
                 City = "Chattanooga",
                 ZIP = 37341,
                 Sold = false,
+                AvailableUntil = DateTime.Now.AddDays(15) // Available for 15 days
             },
             new Plant()
             {
@@ -49,13 +52,20 @@ public static class PlantOption
                 City = "Smyrna",
                 ZIP = 37086,
                 Sold = true,
+                AvailableUntil = DateTime.Now.AddDays(10) // Available for 10 days
             }
         };
     }
 
+    public static string PlantDetails(Plant plant)
+    {
+        string availability = plant.Sold ? "was sold" : "is available";
+        return $"A {plant.Species} in {plant.City} {availability} for {plant.AskingPrice} dollars (Available Until: {plant.AvailableUntil:yyyy-MM-dd})";
+    }
+
     public static void DisplayPlantOfTheDay(List<Plant> plants, Random random)
     {
-        List<Plant> availablePlants = plants.Where(p => !p.Sold).ToList();
+        List<Plant> availablePlants = plants.Where(p => !p.Sold && p.AvailableUntil > DateTime.Now).ToList();
 
         if (availablePlants.Count == 0)
         {
@@ -75,8 +85,7 @@ public static class PlantOption
 
         for (int i = 0; i < plants.Count; i++)
         {
-            string availability = plants[i].Sold ? "was sold" : "is available";
-            Console.WriteLine($"{i + 1}. A {plants[i].Species} in {plants[i].City} {availability} for {plants[i].AskingPrice} dollars");
+            Console.WriteLine($"{i + 1}. {PlantDetails(plants[i])}");
         }
     }
 
@@ -124,6 +133,30 @@ public static class PlantOption
             Console.WriteLine("Invalid input. ZIP code must be a 5-digit number. Please try again.");
         }
 
+        DateTime availableUntil;
+        while (true)
+        {
+            Console.WriteLine("Enter the available until date (yyyy-MM-dd):");
+            try
+            {
+                string dateInput = Console.ReadLine();
+                availableUntil = DateTime.ParseExact(dateInput, "yyyy-MM-dd", null);
+                break; // If successful, break out of the loop
+            }
+            catch (FormatException)
+            {
+                Console.WriteLine("Invalid date format. Please enter the date in yyyy-MM-dd format.");
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                Console.WriteLine("The date you entered is invalid. Please try again.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An unexpected error occurred: {ex.Message}. Please try again.");
+            }
+        }
+
         Plant newPlant = new Plant()
         {
             Species = species,
@@ -131,7 +164,8 @@ public static class PlantOption
             AskingPrice = askingPrice,
             City = city,
             ZIP = zip,
-            Sold = false
+            Sold = false,
+            AvailableUntil = availableUntil
         };
 
         plants.Add(newPlant);
@@ -141,7 +175,7 @@ public static class PlantOption
 
     public static void AdoptPlant(List<Plant> plants)
     {
-        List<Plant> availablePlants = plants.Where(p => !p.Sold).ToList();
+        List<Plant> availablePlants = plants.Where(p => !p.Sold && p.AvailableUntil > DateTime.Now).ToList();
 
         if (availablePlants.Count == 0)
         {
@@ -154,7 +188,7 @@ public static class PlantOption
             Console.WriteLine("Available Plants:");
             for (int i = 0; i < availablePlants.Count; i++)
             {
-                Console.WriteLine($"{i + 1}. A {availablePlants[i].Species} in {availablePlants[i].City} for {availablePlants[i].AskingPrice} dollars");
+                Console.WriteLine($"{i + 1}. {PlantDetails(availablePlants[i])}");
             }
 
             Console.WriteLine("\nEnter the number of the plant you want to adopt:");
@@ -184,7 +218,7 @@ public static class PlantOption
             Console.WriteLine("All Plants:");
             for (int i = 0; i < plants.Count; i++)
             {
-                Console.WriteLine($"{i + 1}. A {plants[i].Species} in {plants[i].City} for {plants[i].AskingPrice} dollars");
+                Console.WriteLine($"{i + 1}. {PlantDetails(plants[i])}");
             }
 
             Console.WriteLine("\nEnter the number of the plant you want to delist:");
@@ -210,15 +244,7 @@ public static class PlantOption
             return;
         }
 
-        List<Plant> matchingPlants = new List<Plant>();
-
-        foreach (Plant plant in plants)
-        {
-            if (plant.LightNeeds <= maxLightNeeds)
-            {
-                matchingPlants.Add(plant);
-            }
-        }
+        List<Plant> matchingPlants = plants.Where(plant => plant.LightNeeds <= maxLightNeeds && plant.AvailableUntil > DateTime.Now).ToList();
 
         if (matchingPlants.Count == 0)
         {
@@ -229,8 +255,44 @@ public static class PlantOption
             Console.WriteLine("Matching Plants:");
             foreach (Plant plant in matchingPlants)
             {
-                Console.WriteLine($"A {plant.Species} in {plant.City} with light needs of {plant.LightNeeds} for {plant.AskingPrice} dollars.");
+                Console.WriteLine(PlantDetails(plant));
             }
         }
+    }
+
+    public static void DisplayStatistics(List<Plant> plants)
+    {
+        if (plants.Count == 0)
+        {
+            Console.WriteLine("No plants available in the database.");
+            return;
+        }
+
+        // Find the plant with the lowest price
+        Plant lowestPricePlant = plants.OrderBy(p => p.AskingPrice).First();
+        string lowestPriceName = lowestPricePlant.Species;
+
+        // Count available plants
+        int availableCount = plants.Count(p => !p.Sold && p.AvailableUntil > DateTime.Now);
+
+        // Find the plant with the highest light needs
+        Plant highestLightNeedsPlant = plants.OrderByDescending(p => p.LightNeeds).First();
+        string highestLightNeedsName = highestLightNeedsPlant.Species;
+
+        // Calculate average light needs
+        double averageLightNeeds = plants.Average(p => p.LightNeeds);
+
+        // Calculate the percentage of plants adopted
+        double adoptedPercentage = ((double)plants.Count(p => p.Sold) / plants.Count) * 100;
+
+        // Display statistics
+        Console.WriteLine($@"
+Statistics:
+- Lowest Price Plant: {lowestPriceName}
+- Number of Available Plants: {availableCount}
+- Plant with Highest Light Needs: {highestLightNeedsName}
+- Average Light Needs: {averageLightNeeds:F2}
+- Percentage of Plants Adopted: {adoptedPercentage:F2}%
+");
     }
 }
